@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Payroll System</title>
+
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:#eef2f7;
+}
+
+.header{
+  background:#1f3c88;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.container{ padding:20px; }
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+label{
+  font-size:11px;
+  font-weight:600;
+}
+
+input, select{
+  padding:6px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+button{
+  padding:6px 10px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.btn-add{background:#1f3c88;color:white;}
+.btn-del{background:#d9534f;color:white;}
+.btn-view{background:#5cb85c;color:white;}
+.btn-edit{background:#f0ad4e;color:white;}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid #000;
+  padding:6px;
+  font-size:12px;
+  text-align:center;
+}
+
+#payslip{
+  display:none;
+  background:white;
+  padding:15px;
+  margin-top:15px;
+}
+
+@media print{
+  body *{ visibility:hidden !important; }
+  #payslip, #payslip *{ visibility:visible !important; }
+
+  #payslip{
+    position:absolute;
+    top:10mm;
+    left:50%;
+    transform:translateX(-50%);
+    width:80mm;
+    padding:8mm;
+    font-size:10px;
+  }
+
+  button{ display:none !important; }
+}
+
+#payslip table td{
+  padding:3px 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h2>🏢 PAYROLL SYSTEM PRAKTISS </h2>
+</div>
+
+<div class="container">
+
+<!-- FORM -->
+<div class="card">
+<h3>Employee Form</h3>
+
+<div class="form-grid">
+
+<div class="field"><label>Name</label><input id="name"></div>
+<div class="field"><label>Rate</label><input id="rate" type="number"></div>
+<div class="field"><label>Days</label><input id="days" type="number"></div>
+<div class="field"><label>OT (hours)</label><input id="ot" type="number"></div>
+
+<div class="field">
+  <label>Late</label>
+  <input id="late" type="number">
+  <select id="lateType">
+    <option value="hours">Hours</option>
+    <option value="minutes">Minutes</option>
+  </select>
+</div>
+
+<div class="field"><label>Allowance</label><input id="allowance"></div>
+<div class="field"><label>Bonus</label><input id="bonus"></div>
+<div class="field"><label>Holiday</label><input id="holiday"></div>
+<div class="field"><label>Incentive</label><input id="incentive"></div>
+
+<div class="field"><label>SSS</label><input id="sss"></div>
+<div class="field"><label>PhilHealth</label><input id="phil"></div>
+<div class="field"><label>PagIBIG</label><input id="pagibig"></div>
+<div class="field"><label>Tax</label><input id="tax"></div>
+<div class="field"><label>Loan</label><input id="loan"></div>
+
+</div>
+
+<br>
+<button class="btn-add" onclick="save()">SAVE</button>
+</div>
+
+<!-- LIST -->
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Net Pay</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+
+<!-- PAYSLIP -->
+<div id="payslip">
+
+<h3 style="text-align:center;">PAYSLIP</h3>
+<hr>
+
+<table style="width:100%;font-size:11px;">
+<tr>
+<td><b>Name:</b> <span id="ps_name"></span></td>
+<td><b>Date:</b> <span id="ps_date"></span></td>
+</tr>
+<tr>
+<td><b>Rate:</b> ₱<span id="ps_rate"></span></td>
+<td><b>Days:</b> <span id="ps_days"></span></td>
+</tr>
+<tr>
+<td><b>OT:</b> <span id="ps_ot_top"></span></td>
+<td><b>Late:</b> <span id="ps_late_top"></span></td>
+</tr>
+</table>
+
+<br>
+
+<table>
+<tr>
+<th>EARNINGS</th><th>AMOUNT</th>
+<th>DEDUCTIONS</th><th>AMOUNT</th>
+</tr>
+
+<tr><td>Basic</td><td id="ps_basic"></td><td>SSS</td><td id="ps_sss"></td></tr>
+<tr><td>OT</td><td id="ps_ot"></td><td>PhilHealth</td><td id="ps_phil"></td></tr>
+<tr><td>Allowance</td><td id="ps_allowance"></td><td>PagIBIG</td><td id="ps_pagibig"></td></tr>
+<tr><td>Bonus</td><td id="ps_bonus"></td><td>Tax</td><td id="ps_tax"></td></tr>
+<tr><td>Holiday</td><td id="ps_holiday"></td><td>Loan</td><td id="ps_loan"></td></tr>
+<tr><td>Incentive</td><td id="ps_incentive"></td><td>Late</td><td id="ps_late"></td></tr>
+
+<tr>
+<th>Total</th><th id="ps_total_earnings"></th>
+<th>Total</th><th id="ps_total_deductions"></th>
+</tr>
+
+<tr>
+<th colspan="2">NET PAY</th>
+<th colspan="2" id="ps_net"></th>
+</tr>
+</table>
+
+<br>
+
+<!-- SIGNATURE -->
+<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:20px;">
+
+  <div style="text-align:center;">
+    <p>Received by:</p>
+    <br>
+    <span id="ps_received_name" style="border-top:1px solid #000;display:inline-block;width:160px;"></span>
+  </div>
+
+  <div style="text-align:center;">
+    <p>Prepared by:</p>
+    <br>
+    <span style="border-top:1px solid #000;display:inline-block;width:160px;">
+      HR / Payroll Officer
+    </span>
+  </div>
+
+</div>
+
+<br>
+
+<!-- BUTTONS -->
+<button onclick="downloadPDF()" style="background:#28a745;color:white;">
+  DOWNLOAD PDF
+</button>
+
+<button onclick="window.print()" style="background:red;color:white;">
+  PRINT
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let employees = JSON.parse(localStorage.getItem("emp")) || [];
+let editIndex = -1;
+
+/* SAVE */
+function save(){
+
+  const name = document.getElementById("name").value.trim();
+  if(name === "") return alert("Name is required!");
+
+  const rate = Number(document.getElementById("rate").value) || 0;
+  const days = Number(document.getElementById("days").value) || 0;
+  const ot = Number(document.getElementById("ot").value) || 0;
+
+  const late = Number(document.getElementById("late").value) || 0;
+  const lateType = document.getElementById("lateType").value;
+
+  const allowance = Number(document.getElementById("allowance").value) || 0;
+  const bonus = Number(document.getElementById("bonus").value) || 0;
+  const holiday = Number(document.getElementById("holiday").value) || 0;
+  const incentive = Number(document.getElementById("incentive").value) || 0;
+
+  const sss = Number(document.getElementById("sss").value) || 0;
+  const phil = Number(document.getElementById("phil").value) || 0;
+  const pagibig = Number(document.getElementById("pagibig").value) || 0;
+  const tax = Number(document.getElementById("tax").value) || 0;
+  const loan = Number(document.getElementById("loan").value) || 0;
+
+  let hourly = rate / 8;
+  let otPay = ot * hourly;
+
+  let lateHours = (lateType === "minutes") ? late / 60 : late;
+  let lateDeduction = lateHours * hourly;
+
+  let basic = rate * days;
+
+  let earnings = basic + otPay + allowance + bonus + holiday + incentive;
+  let deductions = sss + phil + pagibig + tax + loan + lateDeduction;
+  let net = earnings - deductions;
+
+  let e = {
+    name, rate, days, ot,
+    hourly, otPay,
+    late, lateType, lateDeduction,
+    allowance, bonus, holiday, incentive,
+    sss, phil, pagibig, tax, loan,
+    basic, earnings, deductions, net
+  };
+
+  if(editIndex === -1){
+    employees.push(e);
+  } else {
+    employees[editIndex] = e;
+    editIndex = -1;
+  }
+
+  localStorage.setItem("emp", JSON.stringify(employees));
+
+  clear();
+  render();
+  document.getElementById("payslip").style.display = "none";
+}
+
+/* EDIT */
+function edit(i){
+  let e = employees[i];
+  editIndex = i;
+
+  document.getElementById("name").value = e.name;
+  document.getElementById("rate").value = e.rate;
+  document.getElementById("days").value = e.days;
+  document.getElementById("ot").value = e.ot;
+
+  document.getElementById("late").value = e.late;
+  document.getElementById("lateType").value = e.lateType;
+
+  document.getElementById("allowance").value = e.allowance;
+  document.getElementById("bonus").value = e.bonus;
+  document.getElementById("holiday").value = e.holiday;
+  document.getElementById("incentive").value = e.incentive;
+
+  document.getElementById("sss").value = e.sss;
+  document.getElementById("phil").value = e.phil;
+  document.getElementById("pagibig").value = e.pagibig;
+  document.getElementById("tax").value = e.tax;
+  document.getElementById("loan").value = e.loan;
+}
+
+/* DELETE */
+function del(i){
+  employees.splice(i,1);
+  localStorage.setItem("emp", JSON.stringify(employees));
+  render();
+  document.getElementById("payslip").style.display = "none";
+}
+
+/* VIEW */
+function view(i){
+
+  let e = employees[i];
+  document.getElementById("payslip").style.display = "block";
+
+  document.getElementById("ps_name").innerText = e.name;
+  document.getElementById("ps_date").innerText = new Date().toLocaleDateString();
+
+  document.getElementById("ps_rate").innerText = e.rate;
+  document.getElementById("ps_days").innerText = e.days;
+
+  document.getElementById("ps_ot_top").innerText = "₱" + e.otPay.toFixed(2);
+  document.getElementById("ps_ot").innerText = "₱" + e.otPay.toFixed(2);
+
+  document.getElementById("ps_late_top").innerText =
+    e.late + " " + e.lateType + " (₱" + e.lateDeduction.toFixed(2) + ")";
+
+  document.getElementById("ps_received_name").innerText = e.name;
+
+  document.getElementById("ps_basic").innerText = e.basic;
+  document.getElementById("ps_allowance").innerText = e.allowance;
+  document.getElementById("ps_bonus").innerText = e.bonus;
+  document.getElementById("ps_holiday").innerText = e.holiday;
+  document.getElementById("ps_incentive").innerText = e.incentive;
+
+  document.getElementById("ps_sss").innerText = e.sss;
+  document.getElementById("ps_phil").innerText = e.phil;
+  document.getElementById("ps_pagibig").innerText = e.pagibig;
+  document.getElementById("ps_tax").innerText = e.tax;
+  document.getElementById("ps_loan").innerText = e.loan;
+
+  document.getElementById("ps_late").innerText = e.lateDeduction.toFixed(2);
+
+  document.getElementById("ps_total_earnings").innerText = e.earnings.toFixed(2);
+  document.getElementById("ps_total_deductions").innerText = e.deductions.toFixed(2);
+  document.getElementById("ps_net").innerText = e.net.toFixed(2);
+}
+
+/* RENDER */
+function render(){
+  let list = document.getElementById("list");
+  list.innerHTML = "";
+
+  employees.forEach((e,i)=>{
+    list.innerHTML += `
+      <tr>
+        <td>${e.name}</td>
+        <td>₱${e.net.toFixed(2)}</td>
+        <td>
+          <button class="btn-view" onclick="view(${i})">View</button>
+          <button class="btn-edit" onclick="edit(${i})">Edit</button>
+          <button class="btn-del" onclick="del(${i})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* CLEAR */
+function clear(){
+  document.querySelectorAll("input").forEach(i=>i.value="");
+}
+
+/* PDF DOWNLOAD (FIXED EXACT OUTPUT) */
+function downloadPDF(){
+
+  const payslip = document.getElementById("payslip");
+  payslip.style.display = "block";
+
+  const opt = {
+    margin: 0.2,
+    filename: 'PAYSLIP_' + document.getElementById("ps_name").innerText + '.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: {
+      scale: 3,
+      useCORS: true,
+      scrollY: 0
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    }
+  };
+
+  html2pdf().set(opt).from(payslip).save();
+}
+
+render();
+
+</script>
+
+</body>
+</html>
