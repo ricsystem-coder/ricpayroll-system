@@ -109,12 +109,26 @@ th,td{
 </head>
 
 <body>
+<div id="loginBox" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1f3c88;display:flex;justify-content:center;align-items:center;flex-direction:column;z-index:9999;color:white;">
 
-<div class="header">
-  <h2>🏢 PAYROLL SYSTEM X LOREN NYAKIS </h2>
+  <h2>🔐 Payroll System Login</h2>
+
+  <input id="user" placeholder="Username" style="padding:8px;margin:5px;">
+  <input id="pass" type="password" placeholder="Password" style="padding:8px;margin:5px;">
+
+  <button onclick="login()" style="padding:8px 15px;margin-top:10px;">Login</button>
+
+  <p id="error" style="color:red;"></p>
+
 </div>
 
-<div class="container">
+<div class="header">
+  <h2>🏢 PAYROLL SYSTEM PRAKTISS </h2>
+</div>
+
+<div class="container" id="app" style="display:none;">
+
+</div>
 
 <!-- FORM -->
 <div class="card">
@@ -437,7 +451,17 @@ function downloadPDF(){
 }
 
 render();
+function login(){
+  const user = document.getElementById("user").value;
+  const pass = document.getElementById("pass").value;
 
+  if(user === "admin" && pass === "1234"){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } else {
+    document.getElementById("error").innerText = "Wrong username or password!";
+  }
+}
 </script>
 
 </body>
